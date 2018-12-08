@@ -1,6 +1,6 @@
 # STAT-327-
 ### STAT 327 001 002 003
-This is the files and some HW when I take the courses STAT327, this course is aimed for students to learn R, I think it's very useful to me 
+This is the files and some HW when I take the courses STAT327, this course is aimed for students to learn R, I think it's very useful to me. 
 Although I have learned R for one year and half (before this course I think I was kind of a master on it), I still learnt a lot on this course.
 I'll upload some files sequentially once I have the time.
 
