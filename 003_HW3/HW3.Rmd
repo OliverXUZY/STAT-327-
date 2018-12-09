@@ -1,7 +1,9 @@
 ---
-output: html_document
-editor_options: 
+editor_options:
   chunk_output_type: console
+output:
+  html_document: default
+  pdf_document: default
 ---
 # STAT 327 003 Homework 3
 
@@ -29,6 +31,7 @@ ima_blue = ima[,,3]
 image(t(ima_red[nrow(ima_red):1,]),col = gray((1:12)/13),main = "red channel")
 
 ```
+
 
 This is one showedred channel  image for example.
 
@@ -90,13 +93,9 @@ final_array3 = array(c(filtered_list3[[1]],filtered_list3[[2]],filtered_list3[[3
 
 final_array5 = array(c(filtered_list5[[1]],filtered_list5[[2]],filtered_list5[[3]]),dim = dim(ima))
 
-
-
-
-
 ```
 
-### Part 4: write images
+### Part 4: write imagesand show
 This part is using the writePNG function write array into image and stored in working sirectory files.
 ```{r}
 
@@ -105,15 +104,20 @@ writePNG(final_array1,"zxu_1.png")
 writePNG(final_array3,"zxu_3.png")
 writePNG(final_array5,"zxu_5.png")
 
-
 ```
+##### show
+![alt text](zxu_1.png)
+![alt text](zxu_3.png)
+
+![alt text](zxu_5.png)
+
 
 
 ### Part 5: Detect edges
 ```{r}
 
 #################  detect edges
-filter_sd = function(mat,k=1,top = 0.01){
+filter_sd = function(mat,k=1){
   nrow = dim(mat)[1]
   ncol = dim(mat)[2]
   pad = matrix(0,nrow + 2*k, ncol + 2*k)
@@ -127,7 +131,7 @@ filter_sd = function(mat,k=1,top = 0.01){
 
   mat2 = mat2[ (k+1):(nrow + k),(k+1):(ncol + k)  ]
   ## identify edge
-  mat2[mat2 > quantile(mat2,1-top)] = 1    ##   identify edge by select top 1% or 10% 
+ # mat2[mat2 > quantile(mat2,1-top)] = 1    ##   identify edge by select top 1% or 10% 
                                        ##  values in matrix and replace them by 1 
   return(mat2)
 }
@@ -150,13 +154,13 @@ read_image = function(file_name)
 ## ima_li list to be apply filter function
 ## top: percentage pixesto be replaced by 1
 ## dim_final: the dimension final array(the one can be used on the writePNG)
-filter_assemble_edge = function(cores,ima_li,top,dim_final)
+filter_assemble_edge = function(cores,ima_li,dim_final)
 {
   require("parallel")
-  n_cores = detectCores()
+  #n_cores = detectCores()
   cluster = makePSOCKcluster(names=cores)
 
-  filtered_list = parLapply(cl = cluster,fun = filter_sd,X = ima_li,top = top)
+  filtered_list = parLapply(cl = cluster,fun = filter_sd,X = ima_li)
   stopCluster(cl=cluster)
   
   ### assemble
@@ -174,14 +178,23 @@ filter_assemble_edge = function(cores,ima_li,top,dim_final)
 ```{r}
 ima_li_Van = read_image('Van_Gogh.png')[[1]]
 dim_final = read_image('Van_Gogh.png')[[2]]
-final_array_Van = filter_assemble_edge(3,ima_li_Van,0.1,dim_final)
-
+final_array_Van = filter_assemble_edge(3,ima_li_Van,dim_final)
+mat2 = final_array_Van[,,1]
+top = 0.1
+ima_li_Van[[3]][mat2 > quantile(mat2,1-top)] = 1 
+final_array_Van = array(c(ima_li_Van[[1]],ima_li_Van[[2]],ima_li_Van[[3]]),
+                      dim = dim_final)
 ### write
 writePNG(final_array_Van,"edge_Van.png")
 
 ```
+![alt text](edge_Van.png)
 
-I choose top pixes to be 0.1, the edge is detected, is ti be highlight in white
+
+When I choose top pixes to be 1%, then the bird was highlighted.
+
+Then I choose top pixes to be 0.1, all the edge is detected(including birds and roads), it has been highlight in white. This is because I chooose the top 10% high pixes to be 1.
+
 
 
 
@@ -189,12 +202,27 @@ I choose top pixes to be 0.1, the edge is detected, is ti be highlight in white
 ```{r}
 ima_li_Van = read_image('Madison.png')[[1]]
 dim_final = read_image('Madison.png')[[2]]
-final_array_Van = filter_assemble_edge(3,ima_li_Van,0.1,dim_final)
+final_array_Van = filter_assemble_edge(3,ima_li_Van,dim_final)
 
+### replace by 1
+top = 0.1
+mat2 = final_array_Van[,,1]
+ima_li_Van[[1]][mat2 > quantile(mat2,1-top)] = 1 
+
+mat2 = final_array_Van[,,2]
+ima_li_Van[[2]][mat2 > quantile(mat2,1-top)] = 1 
+
+mat2 = final_array_Van[,,3]
+ima_li_Van[[3]][mat2 > quantile(mat2,1-top)] = 1 
+
+final_array_Van = array(c(ima_li_Van[[1]],ima_li_Van[[2]],ima_li_Van[[3]]),
+                      dim = dim_final)
 ### write
 writePNG(final_array_Van,"edge_Madison.png")
 
 ```
+
+![alt text](edge_Madison.png)
 
 
 I choose top pixes to be 0.1, the edge is detected, is ti be highlight in white.
